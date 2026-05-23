@@ -1,0 +1,8 @@
+{
+  "name": "Rebirth of Knight Demo",
+  "description": "Una demo RPG en 2D pixel-art de Rebirth of Knight, enfrentando a los Brull en el bosque de Dumur.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
