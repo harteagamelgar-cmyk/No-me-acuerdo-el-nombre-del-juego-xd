@@ -1,26 +1,35 @@
 import React from 'react';
-import { MAP_WIDTH, MAP_HEIGHT, getTile } from '../data/map';
-import { Entity } from '../types';
+import { getTileVisualVal } from '../data/levels';
+import { Entity, LevelDef } from '../types';
 import { getEntityIcon, getTileVisual } from './Icons';
 
 type GridProps = {
+  level: LevelDef;
   player: Entity;
   npc: Entity;
   enemies: Entity[];
+  items: Entity[];
 };
 
-export const GameGrid: React.FC<GridProps> = ({ player, npc, enemies }) => {
+export const GameGrid: React.FC<GridProps> = ({ level, player, npc, enemies, items }) => {
   const getCellContent = (x: number, y: number) => {
     // Entities
-    if (player.x === x && player.y === y) return getEntityIcon(player.type, player.isDead);
-    if (npc.x === x && npc.y === y) return getEntityIcon(npc.type, npc.isDead);
+    if (player.x === x && player.y === y) return getEntityIcon(player.type, player.isDead, player.name);
+    if (npc.x === x && npc.y === y) return getEntityIcon(npc.type, npc.isDead, npc.name);
     
     const enemyAt = enemies.find(e => e.x === x && e.y === y);
-    if (enemyAt) return getEntityIcon(enemyAt.type, enemyAt.isDead);
+    if (enemyAt) return getEntityIcon(enemyAt.type, enemyAt.isDead, enemyAt.name);
+
+    const itemAt = items.find(i => i.x === x && i.y === y && !i.isDead);
+    if (itemAt) return getEntityIcon(itemAt.type, itemAt.isDead, itemAt.name);
 
     // Terrain
-    return getTileVisual(getTile(x, y));
+    const val = level.layout[y][x];
+    return getTileVisual(getTileVisualVal(val));
   };
+
+  const MAP_WIDTH = level.layout[0].length;
+  const MAP_HEIGHT = level.layout.length;
 
   return (
     <div 
@@ -41,3 +50,4 @@ export const GameGrid: React.FC<GridProps> = ({ player, npc, enemies }) => {
     </div>
   );
 };
+

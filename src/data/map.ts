@@ -40,9 +40,14 @@ export const INITIAL_PLAYER: Entity = {
   name: 'Emeo',
   hp: 25,
   maxHp: 25,
+  mp: 10,
+  maxMp: 10,
+  xp: 0,
+  level: 1,
   attack: 4,
   x: 2,
-  y: 5
+  y: 5,
+  isDead: false
 };
 
 export const INITIAL_NPC: Entity = {
@@ -55,10 +60,16 @@ export const INITIAL_NPC: Entity = {
   x: 2,
   y: 6,
   isDead: false
-}
+};
 
 export const INITIAL_ENEMIES: Entity[] = [
-  { id: 'e1', type: 'enemy', name: 'Brull', hp: 8, maxHp: 8, attack: 2, x: 8, y: 3, isDead: false },
-  { id: 'e2', type: 'enemy', name: 'Brull Oscuro', hp: 12, maxHp: 12, attack: 3, x: 11, y: 7, isDead: false },
-  { id: 'e3', type: 'enemy', name: 'Brull', hp: 8, maxHp: 8, attack: 2, x: 7, y: 8, isDead: false }
+  { id: 'e1', type: 'enemy', name: 'Brull', hp: 8, maxHp: 8, attack: 2, xp: 10, x: 8, y: 3, isDead: false },
+  { id: 'e2', type: 'enemy', name: 'Brull Oscuro', hp: 15, maxHp: 15, attack: 4, xp: 25, x: 11, y: 7, isDead: false },
+  { id: 'e3', type: 'enemy', name: 'Brull', hp: 8, maxHp: 8, attack: 2, xp: 10, x: 7, y: 8, isDead: false },
+  { id: 'e4', type: 'enemy', name: 'Espectro Brull', hp: 10, maxHp: 10, attack: 3, xp: 15, x: 5, y: 2, isDead: false }
+];
+
+export const INITIAL_ITEMS: Entity[] = [
+  { id: 'i1', type: 'item', name: 'Poción Menor', hp: 0, maxHp: 0, attack: 0, x: 4, y: 8, isDead: false, itemType: 'potion' },
+  { id: 'i2', type: 'item', name: 'Poción Menor', hp: 0, maxHp: 0, attack: 0, x: 12, y: 1, isDead: false, itemType: 'potion' }
 ];

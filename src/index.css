@@ -17,7 +17,28 @@ body {
   user-select: none;
 }
 
+@keyframes fade-in-out {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes intro-scroll {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(-100%); }
+}
+
+.animate-fade-in-out {
+  animation: fade-in-out 3s ease-in-out forwards;
+}
+
+.animate-intro-scroll {
+  animation: intro-scroll 20s linear infinite;
+}
+
 .crt::before {
+
   content: " ";
   display: block;
   position: absolute;
@@ -35,7 +56,10 @@ body {
   pointer-events: none;
 }
 
-.pixel-art {
+.pixel-art * {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
