@@ -31,6 +31,20 @@ const FOREST_LAYOUT = [
   [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ];
 
+const CAVE_LAYOUT = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,1,3,3,3,3,3,1,0,0,0,1],
+  [1,0,1,0,1,3,1,1,1,3,1,0,1,0,1],
+  [1,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+  [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1],
+  [1,0,0,0,0,0,1,0,1,0,0,0,0,0,1],
+  [1,1,1,1,1,0,1,0,1,0,1,1,1,1,1],
+  [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+  [1,0,1,1,1,1,1,1,1,1,1,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+
 export const MAP_WIDTH = 15;
 export const MAP_HEIGHT = 11;
 
@@ -103,7 +117,33 @@ export const LEVELS: LevelDef[] = [
     winDialogue: [
       { speaker: 'Emeo', text: 'El área está despejada.' },
       { speaker: 'Dhalia', text: 'Los Brull eran solo la vanguardia. El bosque es más profundo de lo que pensé...' },
-      { speaker: 'Emeo', text: 'Continuaremos hasta hallar la Semilla de Prisma.' },
+      { speaker: 'Emeo', text: 'Mira esa entrada oculta... una cueva.' },
+      { speaker: 'Dhalia', text: 'Vamos, la presencia es más fuerte allí abajo.' }
+    ]
+  },
+  {
+    id: 'cave',
+    name: 'Cueva de los Secretos',
+    layout: CAVE_LAYOUT,
+    playerStart: { x: 7, y: 9 },
+    npcStart: { x: 8, y: 9 },
+    enemies: [
+      { id: 'c1', type: 'enemy', name: 'Murciélago', hp: 12, maxHp: 12, attack: 3, xpReward: 15, x: 2, y: 1, isDead: false },
+      { id: 'c2', type: 'enemy', name: 'Lobo Cavernario', hp: 20, maxHp: 20, attack: 5, xpReward: 30, x: 12, y: 1, isDead: false },
+      { id: 'c3', type: 'enemy', name: 'Murciélago', hp: 12, maxHp: 12, attack: 3, xpReward: 15, x: 12, y: 7, isDead: false },
+      { id: 'c4', type: 'enemy', name: 'Golem Brull', hp: 30, maxHp: 30, attack: 7, xpReward: 50, x: 7, y: 3, isDead: false }
+    ],
+    items: [
+      { id: 'i3', type: 'item', name: 'Poción Mayor', hp: 0, maxHp: 0, attack: 0, x: 7, y: 1, isDead: false, itemType: 'potion' }
+    ],
+    introDialogue: [
+      { speaker: 'Emeo', text: 'Está muy oscuro aquí.' },
+      { speaker: 'Dhalia', text: 'Cuidado, hay monstruos fuertes adelante. ¡Prepárate!' }
+    ],
+    winDialogue: [
+      { speaker: 'Emeo', text: 'Hemos vencido a la bestia de la cueva.' },
+      { speaker: 'Dhalia', text: 'Allí está, Emeo. La Semilla de Prisma brilla en el pedestal.' },
+      { speaker: 'Emeo', text: 'Lo hemos logrado. Volvamos a la aldea.' },
       { speaker: 'Sistema', text: '[FIN DE LA DEMO]' }
     ]
   }

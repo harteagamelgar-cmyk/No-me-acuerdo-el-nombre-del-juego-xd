@@ -20,8 +20,12 @@ export default function App() {
     specialAttack
   } = useGame();
 
+  const [crtEnabled, setCrtEnabled] = React.useState(true);
+  const [musicVol, setMusicVol] = React.useState(100);
+  const [sfxVol, setSfxVol] = React.useState(100);
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center font-retro text-[8px] sm:text-xs crt pixel-art bg-[var(--color-game-bg)] select-none touch-none">
+    <div className={`min-h-screen w-full flex items-center justify-center font-retro text-[8px] sm:text-xs pixel-art bg-[var(--color-game-bg)] select-none touch-none ${crtEnabled ? 'crt' : ''}`}>
       <div className="w-full max-w-2xl min-h-screen sm:min-h-0 sm:h-auto bg-neutral-900 sm:border-8 border-neutral-700 p-2 pt-6 sm:p-6 sm:rounded-xl flex flex-col items-center relative z-10 shadow-2xl overflow-y-auto overflow-x-hidden">
         
         {/* HEADER / HUD */}
@@ -75,18 +79,36 @@ export default function App() {
           )}
 
           {gameState === 'CREDITS' && (
-            <div className="absolute inset-0 bg-black/95 flex flex-col items-center py-10 px-4 z-40 border-4 border-gray-600 justify-between">
-              <div className="text-center">
-                <h2 className="text-xl sm:text-2xl text-[var(--color-game-ui)] mb-6">CRÉDITOS</h2>
-                <div className="text-[8px] sm:text-[10px] text-gray-300 space-y-4">
+            <div className="absolute inset-0 bg-black/95 flex flex-col items-center py-6 px-4 z-40 border-4 border-gray-600 justify-between overflow-y-auto">
+              <div className="text-center w-full my-auto">
+                <h2 className="text-xl sm:text-2xl text-[var(--color-game-ui)] mb-4 mt-4">CRÉDITOS</h2>
+                <div className="text-[8px] sm:text-[10px] text-gray-300 space-y-2 pb-4">
                   <p>Un juego de <span className="text-white">Cool Games Studio</span></p>
-                  <p>Desarrollo y Diseño:<br/>Titan speakerwoman</p>
-                  <p>Música e Historia:<br/>Mundo de Camoris</p>
+                  
+                  <div className="mt-4">
+                    <p className="text-[var(--color-game-ui)] mb-1">Música</p>
+                    <p>Zinizter_Vinyl</p>
+                  </div>
+
+                  <div className="mt-2">
+                    <p className="text-[var(--color-game-ui)] mb-1">Escritura</p>
+                    <p>Perjota<br/>Nonono<br/>Isa</p>
+                  </div>
+
+                  <div className="mt-2">
+                    <p className="text-[var(--color-game-ui)] mb-1">Arte Pixel</p>
+                    <p>Nando<br/>Elegardo/gabriel</p>
+                  </div>
+
+                  <div className="mt-2">
+                    <p className="text-[var(--color-game-ui)] mb-1">Multi tarea</p>
+                    <p>animekiller</p>
+                  </div>
                 </div>
               </div>
               <button 
                 onClick={() => setGameState('MAIN_MENU')}
-                className="px-4 py-2 border border-gray-400 text-gray-400 hover:text-white hover:border-white uppercase text-[8px]"
+                className="px-4 py-2 border border-gray-400 text-gray-400 hover:text-white hover:border-white uppercase text-[8px] shrink-0 mb-4"
               >
                 Volver
               </button>
@@ -97,18 +119,27 @@ export default function App() {
             <div className="absolute inset-0 bg-black/95 flex flex-col items-center py-10 px-4 z-40 border-4 border-gray-600 justify-between">
               <div className="text-center w-full">
                 <h2 className="text-xl sm:text-2xl text-[var(--color-game-ui)] mb-6">OPCIONES</h2>
-                <div className="text-[8px] sm:text-[10px] text-gray-300 space-y-4">
-                  <div className="flex justify-between items-center opacity-50 px-8">
+                <div className="text-[8px] sm:text-[10px] text-gray-300 space-y-6">
+                  <div 
+                    className="flex justify-between items-center px-8 cursor-pointer active:text-white hover:text-white"
+                    onClick={() => setMusicVol(v => v === 100 ? 50 : v === 50 ? 0 : 100)}
+                  >
                      <span>Volumen Música</span>
-                     <span>100%</span>
+                     <span>{musicVol}%</span>
                   </div>
-                  <div className="flex justify-between items-center opacity-50 px-8">
+                  <div 
+                    className="flex justify-between items-center px-8 cursor-pointer active:text-white hover:text-white"
+                    onClick={() => setSfxVol(v => v === 100 ? 50 : v === 50 ? 0 : 100)}
+                  >
                      <span>Volumen SFX</span>
-                     <span>100%</span>
+                     <span>{sfxVol}%</span>
                   </div>
-                  <div className="flex justify-between items-center px-8 text-yellow-500">
+                  <div 
+                    className={`flex justify-between items-center px-8 cursor-pointer active:text-white hover:text-white ${crtEnabled ? 'text-yellow-500' : 'text-gray-500'}`}
+                    onClick={() => setCrtEnabled(prev => !prev)}
+                  >
                      <span>Filtro CRT</span>
-                     <span>ACTIVADO</span>
+                     <span>{crtEnabled ? 'ACTIVADO' : 'DESACTIVADO'}</span>
                   </div>
                 </div>
               </div>
@@ -124,7 +155,7 @@ export default function App() {
           {gameState === 'INTRO_SCROLL' && (
              <div 
                className="absolute inset-0 bg-black flex flex-col items-center justify-center z-40 border-4 border-blue-900 p-4 sm:p-8 cursor-pointer overflow-hidden"
-               onClick={startGame}
+               onClick={() => startGame()}
              >
                 <div className="animate-intro-scroll text-justify w-[80%] space-y-4">
                    <p className="text-blue-400 text-xs sm:text-sm leading-relaxed mb-4 text-center">
@@ -149,7 +180,7 @@ export default function App() {
             <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center z-20">
               <h2 className="text-2xl sm:text-3xl text-red-600 mb-6 drop-shadow-[0_0_15px_rgba(255,0,0,0.8)]">HAS CAÍDO</h2>
               <button 
-                onClick={startGame}
+                onClick={() => startGame()}
                 className="px-4 py-3 border border-red-600 text-red-600 active:bg-red-600 active:text-black sm:hover:bg-red-600 sm:hover:text-black transition-colors"
               >
                 Intentar desde inicio
@@ -164,7 +195,7 @@ export default function App() {
           {(gameState === 'DIALOGUE' || gameState === 'VICTORY') && currentDialogueLine && (
             <div 
                className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-blue-950/95 border-2 border-blue-400 p-2 sm:p-4 z-30 cursor-pointer active:bg-blue-900"
-               onClick={nextDialogue}
+               onClick={() => nextDialogue()}
             >
               <div className="text-blue-300 mb-1 sm:mb-2 uppercase text-[8px] sm:text-[10px]">{currentDialogueLine.speaker}</div>
               <div className="text-white leading-loose text-[9px] sm:text-sm">{currentDialogueLine.text}</div>
