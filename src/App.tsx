@@ -92,7 +92,7 @@ export default function App() {
 
                   <div className="mt-2">
                     <p className="text-[var(--color-game-ui)] mb-1">Escritura</p>
-                    <p>Perjota<br/>Nonono<br/>Isa</p>
+                    <p>Perjota<br/>Nonono</p>
                   </div>
 
                   <div className="mt-2">
