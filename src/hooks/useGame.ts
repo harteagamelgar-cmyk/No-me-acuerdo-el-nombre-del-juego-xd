@@ -10,6 +10,7 @@ export function useGame() {
   const [npc, setNpc] = useState<Entity>({ id: 'npc', type: 'npc', name: 'Dhalia', hp: 15, maxHp: 15, attack: 5, x: -1, y: -1, isDead: false });
   const [enemies, setEnemies] = useState<Entity[]>([]);
   const [items, setItems] = useState<Entity[]>([]);
+  const [mapLayout, setMapLayout] = useState<number[][]>([]);
   
   const [currentDialogue, setCurrentDialogue] = useState(LEVELS[0].introDialogue);
   const [dialogueIndex, setDialogueIndex] = useState(0);
@@ -29,7 +30,7 @@ export function useGame() {
     const level = LEVELS[index];
     if (!level) return;
 
-    setPlayer({ ...pBase, x: level.playerStart.x, y: level.playerStart.y });
+    setPlayer({ ...pBase, hp: pBase.maxHp, mp: pBase.maxMp ?? 10, isDead: false, x: level.playerStart.x, y: level.playerStart.y });
     if (level.npcStart) {
       setNpc(prev => ({ ...prev, x: level.npcStart!.x, y: level.npcStart!.y }));
     } else {
@@ -37,6 +38,7 @@ export function useGame() {
     }
     setEnemies(JSON.parse(JSON.stringify(level.enemies)));
     setItems(JSON.parse(JSON.stringify(level.items)));
+    setMapLayout(JSON.parse(JSON.stringify(level.layout)));
     setCurrentDialogue(level.introDialogue);
     setDialogueIndex(0);
     setMessageLogs([`Entraste a ${level.name}.`]);
@@ -48,7 +50,16 @@ export function useGame() {
     loadLevel(0, extractBasePlayer(null));
   };
 
+  const restartFromCheckpoint = () => {
+    loadLevel(levelIndex, player);
+  };
+
   const nextDialogue = () => {
+    const currentLine = currentDialogue[dialogueIndex];
+    if (currentLine?.options && currentLine.options.length > 0) {
+      return; // Do not proceed. Must choose an option.
+    }
+
     if (dialogueIndex < currentDialogue.length - 1) {
       setDialogueIndex(prev => prev + 1);
     } else {
@@ -62,6 +73,18 @@ export function useGame() {
         }
       } else {
         setGameState('PLAYING');
+      }
+    }
+  };
+
+  const selectDialogueOption = (optionIndex: number) => {
+    const currentLine = currentDialogue[dialogueIndex];
+    if (currentLine && currentLine.options) {
+      const option = currentLine.options[optionIndex];
+      if (option) {
+         const newDialogue = [...currentDialogue.slice(0, dialogueIndex + 1), ...option.response];
+         setCurrentDialogue(newDialogue);
+         setDialogueIndex(prev => prev + 1);
       }
     }
   };
@@ -87,9 +110,9 @@ export function useGame() {
           const dx = Math.sign(player.x - enemy.x);
           const dy = Math.sign(player.y - enemy.y);
           
-          if (dx !== 0 && !isSolid(currentLevel.layout, enemy.x + dx, enemy.y) && !currentEnemies.some(e => e.id !== enemy.id && !e.isDead && e.x === enemy.x + dx && e.y === enemy.y)) {
+          if (dx !== 0 && !isSolid(mapLayout, enemy.x + dx, enemy.y) && !currentEnemies.some(e => e.id !== enemy.id && !e.isDead && e.x === enemy.x + dx && e.y === enemy.y)) {
             return { ...enemy, x: enemy.x + dx };
-          } else if (dy !== 0 && !isSolid(currentLevel.layout, enemy.x, enemy.y + dy) && !currentEnemies.some(e => e.id !== enemy.id && !e.isDead && e.x === enemy.x && e.y === enemy.y + dy)) {
+          } else if (dy !== 0 && !isSolid(mapLayout, enemy.x, enemy.y + dy) && !currentEnemies.some(e => e.id !== enemy.id && !e.isDead && e.x === enemy.x && e.y === enemy.y + dy)) {
             return { ...enemy, y: enemy.y + dy };
           }
         }
@@ -130,23 +153,50 @@ export function useGame() {
       return;
     }
 
-    const aliveEnemies = enemies.filter(e => !e.isDead);
-    let target = null;
-    let minD = 999;
+    const aliveEnemies = enemies.filter(e => !e.isDead && e.type !== 'npc');
+    let targetEnemy = null;
+    let minEnemyD = 999;
     for (const e of aliveEnemies) {
       const d = Math.abs(e.x - player.x) + Math.abs(e.y - player.y);
-      if (d <= 3 && d < minD) {
-        minD = d;
-        target = e;
+      if (d <= 3 && d < minEnemyD) {
+        minEnemyD = d;
+        targetEnemy = e;
       }
     }
 
-    if (target) {
-      setPlayer(prev => ({ ...prev, mp: Math.max(0, (prev.mp ?? 0) - 5) }));
+    let treeTarget: {x: number, y: number} | null = null;
+    let minTreeD = 999;
+    for (let y = 0; y < mapLayout.length; y++) {
+      for (let x = 0; x < mapLayout[y].length; x++) {
+        if (mapLayout[y][x] === 2 || mapLayout[y][x] === 6) { // bushes too? user just said trees: "srboles"
+          const d = Math.abs(x - player.x) + Math.abs(y - player.y);
+          if (d <= 2 && d < minTreeD) {
+            minTreeD = d;
+            treeTarget = { x, y };
+          }
+        }
+      }
+    }
+
+    if (!targetEnemy && !treeTarget) {
+      addLog("No hay objetivos cerca.");
+      return;
+    }
+
+    setPlayer(prev => ({ ...prev, mp: Math.max(0, (prev.mp ?? 0) - 5) }));
+
+    if (treeTarget && minTreeD <= minEnemyD) {
+      setMapLayout(prev => {
+        const next = prev.map(row => [...row]);
+        next[treeTarget!.y][treeTarget!.x] = 0;
+        return next;
+      });
+      addLog("¡Magia! Dhalia quema un árbol y abre el paso.");
+      enemyTurn();
+    } else if (targetEnemy) {
       const damage = player.attack * 2;
-      
       const newEnemies = enemies.map(e => {
-        if (e.id === target?.id) {
+        if (e.id === targetEnemy?.id) {
           const newHp = Math.max(0, e.hp - damage);
           if (newHp === 0) {
              addLog(`¡Magia! Dhalia asiste: ${e.name} derrotado.`);
@@ -162,16 +212,14 @@ export function useGame() {
       setEnemies(newEnemies);
       enemyTurn();
       checkVictory(newEnemies);
-    } else {
-      addLog("No hay enemigos cerca.");
     }
-  }, [gameState, player, enemies]);
+  }, [gameState, player, enemies, mapLayout]);
 
   const normalAttack = useCallback(() => {
     if (gameState !== 'PLAYING') return;
     if (player.isDead) return;
 
-    const enemyIndex = enemies.findIndex(e => !e.isDead && (Math.abs(e.x - player.x) + Math.abs(e.y - player.y)) === 1);
+    const enemyIndex = enemies.findIndex(e => !e.isDead && e.type !== 'npc' && (Math.abs(e.x - player.x) + Math.abs(e.y - player.y)) === 1);
     
     if (enemyIndex !== -1) {
       const enemy = { ...enemies[enemyIndex] };
@@ -209,9 +257,44 @@ export function useGame() {
       enemyTurn();
       checkVictory(updatedEnemies);
     } else {
-      addLog("Lanzas un golpe al aire. (No hay objetivos cerca)");
+      let rockTarget: {x: number, y: number} | null = null;
+      for (let y = 0; y < mapLayout.length; y++) {
+        for (let x = 0; x < mapLayout[y].length; x++) {
+          if (mapLayout[y][x] === 5) {
+            const d = Math.abs(x - player.x) + Math.abs(y - player.y);
+            if (d === 1) {
+              rockTarget = { x, y };
+              break;
+            }
+          }
+        }
+        if (rockTarget) break;
+      }
+
+      if (rockTarget) {
+        setMapLayout(prev => {
+          const next = prev.map(row => [...row]);
+          next[rockTarget!.y][rockTarget!.x] = 0;
+          return next;
+        });
+        
+        let newHp = Math.max(0, player.hp - 2);
+        setPlayer(prev => ({ ...prev, hp: newHp }));
+        
+        if (newHp === 0) {
+          addLog("Emeo destruyó una roca, pero el golpe fue mortal...");
+          setPlayer(prev => ({ ...prev, isDead: true }));
+          setGameState('GAME_OVER');
+          return;
+        } else {
+          addLog("¡Emeo destruyó una roca! Recibe 2 de daño por el impacto.");
+        }
+        enemyTurn();
+      } else {
+        addLog("Lanzas un golpe al aire. (No hay objetivos cerca)");
+      }
     }
-  }, [gameState, player, enemies, currentLevel]);
+  }, [gameState, player, enemies, currentLevel, mapLayout]);
 
   const movePlayer = useCallback((dx: number, dy: number) => {
     if (gameState !== 'PLAYING') return;
@@ -227,6 +310,46 @@ export function useGame() {
     const enemyIndex = enemies.findIndex(e => e.x === newX && e.y === newY && !e.isDead);
     if (enemyIndex !== -1) {
       const enemy = enemies[enemyIndex];
+      
+      if (enemy.type === 'npc') {
+        let dialogueSequence: DialogueLine[] = [];
+        if (enemy.name === 'Anciano Mayor') {
+            dialogueSequence = [
+              { speaker: enemy.name, text: '¡Emeo, muchacho! Qué bueno verte.' },
+              { 
+                speaker: enemy.name, 
+                text: 'Cuidado con el bosque, se dice que puedes romper rocas si tienes la fuerza. ¿Entendido?',
+                options: [
+                  { label: 'Sí, lo entiendo.', response: [{ speaker: 'Emeo', text: 'Entendido. Lo tendré en cuenta, anciano.' }] },
+                  { label: '¿Cómo romper rocas?', response: [{ speaker: enemy.name, text: 'Golpea las rocas con tu espada [Pulsa Espacio o A].' }] },
+                  { label: 'No tengo tiempo.', response: [{ speaker: 'Emeo', text: 'Tengo prisa, debo irme ya.' }] }
+                ]
+              }
+            ];
+        } else if (enemy.name === 'Aldeano') {
+            dialogueSequence = [
+              { speaker: enemy.name, text: 'Ah, Emeo. La oscuridad de las cuevas es terrible...' },
+              { 
+                speaker: enemy.name, 
+                text: 'Muchos monstruos acechan allí. ¿Crees que podrás con ellos?',
+                options: [
+                  { label: 'Claro, soy fuerte.', response: [{ speaker: 'Emeo', text: 'No te preocupes, yo me haré cargo de ellos.' }] },
+                  { label: 'Tengo mis dudas.', response: [{ speaker: 'Emeo', text: 'La verdad es que estoy un poco asustado.' }, { speaker: enemy.name, text: 'Ten cuidado entonces...' }] },
+                  { label: '...', response: [{ speaker: 'Emeo', text: '...' }] }
+                ]
+              }
+            ];
+        } else {
+            dialogueSequence = [
+              { speaker: enemy.name, text: '¡Hola, Emeo! Suerte en tu aventura.' }
+            ];
+        }
+        setCurrentDialogue(dialogueSequence);
+        setDialogueIndex(0);
+        setGameState('DIALOGUE');
+        return;
+      }
+
       const damage = player.attack + Math.floor(Math.random() * 2);
       enemy.hp -= damage;
       addLog(`Emeo ataca a ${enemy.name} por ${damage} dmg!`);
@@ -263,7 +386,7 @@ export function useGame() {
       return;
     }
 
-    if (!isSolid(currentLevel.layout, newX, newY)) {
+    if (!isSolid(mapLayout, newX, newY)) {
       setPlayer(prev => ({ ...prev, x: newX, y: newY }));
       setNpc(prev => ({ ...prev, x: player.x, y: player.y }));
       
@@ -282,10 +405,64 @@ export function useGame() {
       }
 
       enemyTurn();
+    } else if (mapLayout[newY]?.[newX] === 5) {
+      // Rock
+      const nextX = newX + dx;
+      const nextY = newY + dy;
+      if (!isSolid(mapLayout, nextX, nextY)) {
+        const enemyAt = enemies.find(e => e.x === nextX && e.y === nextY && !e.isDead);
+        const npcAt = npc.x === nextX && npc.y === nextY;
+        const itemAt = items.find(i => i.x === nextX && i.y === nextY && !i.isDead);
+        
+        if (!enemyAt && !npcAt && !itemAt) {
+          addLog("¡Empujaste una roca!");
+          setMapLayout(prev => {
+            const next = prev.map(row => [...row]);
+            next[newY][newX] = 0;
+            next[nextY][nextX] = 5;
+            return next;
+          });
+          setPlayer(prev => ({ ...prev, x: newX, y: newY }));
+          setNpc(prev => ({ ...prev, x: player.x, y: player.y }));
+          enemyTurn();
+          return;
+        } else {
+          addLog("Algo bloquea la roca.");
+        }
+      } else if (mapLayout[nextY]?.[nextX] === 5) {
+        const nextNextX = nextX + dx;
+        const nextNextY = nextY + dy;
+        if (!isSolid(mapLayout, nextNextX, nextNextY)) {
+          const enemyAt = enemies.find(e => e.x === nextNextX && e.y === nextNextY && !e.isDead);
+          const npcAt = npc.x === nextNextX && npc.y === nextNextY;
+          const itemAt = items.find(i => i.x === nextNextX && i.y === nextNextY && !i.isDead);
+          
+          if (!enemyAt && !npcAt && !itemAt) {
+            addLog("¡Empujaste dos rocas!");
+            setMapLayout(prev => {
+              const next = prev.map(row => [...row]);
+              next[newY][newX] = 0;
+              // next[nextY][nextX] = 5; // This is already 5
+              next[nextNextY][nextNextX] = 5;
+              return next;
+            });
+            setPlayer(prev => ({ ...prev, x: newX, y: newY }));
+            setNpc(prev => ({ ...prev, x: player.x, y: player.y }));
+            enemyTurn();
+            return;
+          } else {
+            addLog("Algo bloquea las rocas.");
+          }
+        } else {
+          addLog("Las rocas no se pueden mover más.");
+        }
+      } else {
+        addLog("La roca no se puede mover más.");
+      }
     } else {
       addLog("El camino está bloqueado.");
     }
-  }, [gameState, player, enemies, items, lastMoveTime, currentLevel]);
+  }, [gameState, player, enemies, items, lastMoveTime, mapLayout, npc]);
 
   useEffect(() => {
     if (gameState === 'STUDIO_LOGO') {
@@ -322,6 +499,7 @@ export function useGame() {
     gameState,
     setGameState,
     currentLevel,
+    mapLayout,
     player,
     enemies,
     items,
@@ -329,7 +507,9 @@ export function useGame() {
     currentDialogueLine: currentDialogue[dialogueIndex],
     messageLogs,
     startGame,
+    restartFromCheckpoint,
     nextDialogue,
+    selectDialogueOption,
     movePlayer,
     normalAttack,
     specialAttack

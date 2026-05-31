@@ -23,11 +23,17 @@ export type Entity = {
   xpReward?: number;
 };
 
-export type TileType = 'floor' | 'wall' | 'tree' | 'water' | 'chest' | 'path';
+export type TileType = 'floor' | 'wall' | 'tree' | 'water' | 'chest' | 'path' | 'rock' | 'bush' | 'well' | 'sign' | 'houseWall' | 'houseRoof' | 'woodFloor';
+
+export type DialogueOption = {
+  label: string;
+  response: DialogueLine[];
+};
 
 export type DialogueLine = {
   speaker: string;
   text: string;
+  options?: DialogueOption[];
 };
 
 export type GameState = 'STUDIO_LOGO' | 'MAIN_MENU' | 'CONFIG' | 'CREDITS' | 'INTRO_SCROLL' | 'DIALOGUE' | 'PLAYING' | 'GAME_OVER' | 'VICTORY';

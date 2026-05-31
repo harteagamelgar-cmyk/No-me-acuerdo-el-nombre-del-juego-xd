@@ -1,12 +1,14 @@
 import React from 'react';
 import { useGame } from './hooks/useGame';
 import { GameGrid } from './components/GameGrid';
+import { PixelSprite } from './components/Icons';
 
 export default function App() {
   const {
     gameState,
     setGameState,
     currentLevel,
+    mapLayout,
     player,
     enemies,
     items,
@@ -14,7 +16,9 @@ export default function App() {
     currentDialogueLine,
     messageLogs,
     startGame,
+    restartFromCheckpoint,
     nextDialogue,
+    selectDialogueOption,
     movePlayer,
     normalAttack,
     specialAttack
@@ -32,7 +36,7 @@ export default function App() {
         <div className="w-full flex flex-col mb-2 sm:mb-4 border-b-2 border-[var(--color-game-ui)] pb-2 text-[var(--color-game-ui)] uppercase tracking-wider px-1">
           <div className="flex justify-between items-end mb-1">
             <div className="text-[10px] sm:text-sm">HP: {player.hp}/{player.maxHp}</div>
-            <div className="text-center font-bold text-xs sm:text-base">Rebirth of Knight</div>
+            <div className="text-center font-bold text-xs sm:text-base">The Birth of a Knight</div>
             <div className="text-right text-[10px] sm:text-sm">BRULL: {enemies.filter(e => !e.isDead).length}</div>
           </div>
           <div className="flex justify-between items-end text-[8px] sm:text-[10px] text-blue-400">
@@ -52,28 +56,48 @@ export default function App() {
           )}
 
           {gameState === 'MAIN_MENU' && (
-            <div className="absolute inset-0 bg-black flex flex-col items-center justify-center z-40 border-4 border-[var(--color-game-ui)] text-center p-4 sm:p-8">
-              <h1 className="text-xl sm:text-3xl text-[var(--color-game-ui)] mb-8 sm:mb-12 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)] leading-relaxed">REBIRTH<br/>OF KNIGHT</h1>
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-950 to-black flex flex-col items-center justify-center z-40 border-4 border-[var(--color-game-ui)] text-center p-2 sm:p-6 overflow-hidden">
+              <div className="absolute top-4 left-4 w-10 h-10 sm:w-16 sm:h-16 opacity-20 sm:opacity-50 animate-char-idle">
+                <PixelSprite spriteKey="swordIcon" className="w-full h-full" />
+              </div>
+              <div className="absolute bottom-4 right-4 w-10 h-10 sm:w-16 sm:h-16 opacity-20 sm:opacity-50 animate-enemy-float" style={{animationDelay: '1s'}}>
+                <PixelSprite spriteKey="shieldIcon" className="w-full h-full" />
+              </div>
               
-              <div className="flex flex-col gap-4 w-full max-w-[200px]">
+              <div className="relative mb-4 sm:mb-12 mt-2">
+                <h1 className="text-xl sm:text-4xl text-[var(--color-game-ui)] drop-shadow-[0_0_10px_rgba(250,204,21,1)] leading-tight relative z-10 font-bold">THE BIRTH<br/>OF A KNIGHT</h1>
+                <div className="absolute inset-0 blur-md opacity-50 bg-[var(--color-game-ui)] z-0 rounded-full mix-blend-screen animate-pulse"></div>
+              </div>
+              
+              <div className="flex flex-col gap-2 sm:gap-4 w-full max-w-[180px] sm:max-w-[240px] relative z-10">
                 <button 
                   onClick={() => setGameState('INTRO_SCROLL')}
-                  className="px-4 py-3 border-2 border-[var(--color-game-ui)] text-[var(--color-game-ui)] text-[10px] sm:text-xs active:bg-[var(--color-game-ui)] active:text-black sm:hover:bg-[var(--color-game-ui)] sm:hover:text-black transition-colors uppercase"
+                  className="group relative px-4 py-2 sm:px-6 sm:py-3 border-2 border-[var(--color-game-ui)] text-[var(--color-game-ui)] text-[10px] sm:text-sm bg-black/50 hover:bg-[var(--color-game-ui)] hover:text-black transition-all uppercase flex justify-center items-center"
                 >
+                  <span className="absolute left-2 sm:left-4 opacity-0 group-hover:opacity-100 transition-opacity">▶</span>
                   Jugar
+                  <span className="absolute right-2 sm:right-4 opacity-0 group-hover:opacity-100 transition-opacity">◀</span>
                 </button>
                 <button 
                   onClick={() => setGameState('CONFIG')}
-                  className="px-4 py-3 border-2 border-[var(--color-game-ui)] text-[var(--color-game-ui)] text-[10px] sm:text-xs active:bg-[var(--color-game-ui)] active:text-black sm:hover:bg-[var(--color-game-ui)] sm:hover:text-black transition-colors uppercase"
+                  className="group relative px-4 py-2 sm:px-6 sm:py-3 border-2 border-[var(--color-game-ui)] text-[var(--color-game-ui)] text-[10px] sm:text-sm bg-black/50 hover:bg-[var(--color-game-ui)] hover:text-black transition-all uppercase flex justify-center items-center"
                 >
+                  <span className="absolute left-2 sm:left-4 opacity-0 group-hover:opacity-100 transition-opacity">▶</span>
                   Configuración
+                  <span className="absolute right-2 sm:right-4 opacity-0 group-hover:opacity-100 transition-opacity">◀</span>
                 </button>
                 <button 
                   onClick={() => setGameState('CREDITS')}
-                  className="px-4 py-3 border-2 border-[var(--color-game-ui)] text-[var(--color-game-ui)] text-[10px] sm:text-xs active:bg-[var(--color-game-ui)] active:text-black sm:hover:bg-[var(--color-game-ui)] sm:hover:text-black transition-colors uppercase"
+                  className="group relative px-4 py-2 sm:px-6 sm:py-3 border-2 border-[var(--color-game-ui)] text-[var(--color-game-ui)] text-[10px] sm:text-sm bg-black/50 hover:bg-[var(--color-game-ui)] hover:text-black transition-all uppercase flex justify-center items-center"
                 >
+                  <span className="absolute left-2 sm:left-4 opacity-0 group-hover:opacity-100 transition-opacity">▶</span>
                   Créditos
+                  <span className="absolute right-2 sm:right-4 opacity-0 group-hover:opacity-100 transition-opacity">◀</span>
                 </button>
+              </div>
+              
+              <div className="absolute bottom-2 text-[var(--color-game-ui)] text-[6px] sm:text-[10px] opacity-70">
+                © 2026 Cool Games Studio
               </div>
             </div>
           )}
@@ -179,40 +203,84 @@ export default function App() {
           {gameState === 'GAME_OVER' && (
             <div className="absolute inset-0 bg-black/95 flex flex-col items-center justify-center z-20">
               <h2 className="text-2xl sm:text-3xl text-red-600 mb-6 drop-shadow-[0_0_15px_rgba(255,0,0,0.8)]">HAS CAÍDO</h2>
-              <button 
-                onClick={() => startGame()}
-                className="px-4 py-3 border border-red-600 text-red-600 active:bg-red-600 active:text-black sm:hover:bg-red-600 sm:hover:text-black transition-colors"
-              >
-                Intentar desde inicio
-              </button>
+              <div className="flex flex-col gap-4">
+                <button 
+                  onClick={() => restartFromCheckpoint()}
+                  className="px-4 py-3 border border-red-400 text-red-400 active:bg-red-400 active:text-black sm:hover:bg-red-400 sm:hover:text-black transition-colors"
+                >
+                  Continuar desde Checkpoint
+                </button>
+                <button 
+                  onClick={() => startGame()}
+                  className="px-4 py-3 border border-red-900 text-red-700 active:bg-red-900 active:text-white sm:hover:bg-red-900 sm:hover:text-white transition-colors text-sm"
+                >
+                  Reiniciar todo el juego
+                </button>
+              </div>
             </div>
           )}
 
           {['DIALOGUE', 'PLAYING', 'VICTORY'].includes(gameState) && (currentLevel) && (
-            <GameGrid level={currentLevel} player={player} npc={npc} enemies={enemies} items={items} />
+            <GameGrid level={currentLevel} mapLayout={mapLayout} player={player} npc={npc} enemies={enemies} items={items} gameState={gameState} />
           )}
 
           {(gameState === 'DIALOGUE' || gameState === 'VICTORY') && currentDialogueLine && (
             <div 
-               className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-blue-950/95 border-2 border-blue-400 p-2 sm:p-4 z-30 cursor-pointer active:bg-blue-900"
+               className={`absolute bottom-2 sm:bottom-4 left-2 sm:left-4 right-2 sm:right-4 bg-blue-950/95 border-2 border-blue-400 p-2 sm:p-4 z-50 ${currentDialogueLine.options && currentDialogueLine.options.length > 0 ? '' : 'cursor-pointer active:bg-blue-900'}`}
                onClick={() => nextDialogue()}
             >
               <div className="text-blue-300 mb-1 sm:mb-2 uppercase text-[8px] sm:text-[10px]">{currentDialogueLine.speaker}</div>
               <div className="text-white leading-loose text-[9px] sm:text-sm">{currentDialogueLine.text}</div>
-              <div className="text-right mt-1 sm:mt-2 text-blue-500 animate-pulse text-[8px] sm:text-[10px]">[PULSA A O ESPACIO]</div>
+              {currentDialogueLine.options && currentDialogueLine.options.length > 0 ? (
+                 <div className="mt-2 flex flex-col gap-1">
+                   {currentDialogueLine.options.map((opt, idx) => (
+                     <button
+                       key={idx}
+                       onClick={(e) => { e.stopPropagation(); selectDialogueOption(idx); }}
+                       className="text-left bg-blue-900/50 hover:bg-blue-700 p-2 rounded text-blue-100 text-[9px] sm:text-[12px] border border-blue-600 transition-colors"
+                     >
+                       {idx + 1}. {opt.label}
+                     </button>
+                   ))}
+                 </div>
+              ) : (
+                <div className="text-right mt-1 sm:mt-2 text-blue-500 animate-pulse text-[8px] sm:text-[10px]">[PULSA A O ESPACIO]</div>
+              )}
             </div>
           )}
         </div>
 
         {/* LOGS PANEL */}
-        <div className="w-full sm:h-24 bg-black border-2 border-neutral-700 mt-2 sm:mt-4 p-2 overflow-hidden flex flex-col justify-end aspect-[5/1] sm:aspect-auto">
-          {messageLogs.map((log, i) => (
-            <div key={i} className="text-[7px] sm:text-[10px] text-gray-400 leading-relaxed opacity-80">
-              {'>'} {log}
-            </div>
-          ))}
+        <div className="w-full sm:h-32 bg-black border-2 border-neutral-700 mt-2 sm:mt-4 p-2 overflow-y-auto flex flex-col justify-end aspect-[4/1] sm:aspect-auto font-mono scrollbar-hide">
+          {messageLogs.slice(-6).map((log, i) => {
+            const isDialogue = log.includes(':"') || log.includes(': "');
+            let speaker = "";
+            let text = log;
+            if (isDialogue) {
+               const parts = log.split(/: "(.*)"/);
+               if (parts.length > 1) {
+                  speaker = parts[0];
+                  text = `"${parts[1]}"`;
+               }
+            }
+            return (
+              <div key={i} className={`text-[10px] sm:text-[12px] leading-relaxed opacity-90 ${isDialogue ? 'text-yellow-400 font-semibold mb-1' : 'text-gray-400'}`}>
+                {isDialogue ? (
+                  <div className="flex gap-2 isolate">
+                    <span className="text-yellow-500">{'>'}</span>
+                    <span>
+                      <span className="text-purple-400 font-bold">{speaker}: </span>
+                      <span className="text-white italic">{text}</span>
+                    </span>
+                  </div>
+                ) : (
+                  <span>{'>'} {log}</span>
+                )}
+              </div>
+            );
+          })}
           {gameState === 'PLAYING' && messageLogs.length === 0 && (
-            <div className="text-[7px] sm:text-[10px] text-gray-600">Mueve a Emeo hacia los Brull para atacar...</div>
+            <div className="text-[10px] sm:text-[12px] text-gray-600">Mueve a Emeo hacia los Brull para atacar...</div>
           )}
         </div>
 
@@ -265,7 +333,7 @@ export default function App() {
                      nextDialogue(); 
                    }
                  } else if (gameState === 'GAME_OVER') {
-                    startGame();
+                    restartFromCheckpoint();
                  } else if (gameState === 'PLAYING') {
                     normalAttack();
                  }

@@ -23,25 +23,45 @@ const SPRITES = {
     "1mm11mm1",
     "01m11m10"
   ],
+  villager: [
+    "01111100",
+    "1LLLL100",
+    "1Lsse110",
+    "1Lss1100",
+    "01TTTT10",
+    "01T11T10",
+    "01LLLL10",
+    "01L11L10"
+  ],
+  elder: [
+    "01111100",
+    "1eeee100",
+    "1esse110",
+    "1eeee100",
+    "01mmmm10",
+    "01m11m10",
+    "01mmmm10",
+    "01m11m10"
+  ],
   brull: [
-    "00000000",
+    "00111100",
+    "01RrrR10",
+    "1Ry11yR1",
+    "1RrrrrR1",
     "01111110",
-    "1rrrrrr1",
-    "1r1rr1r1",
-    "1rrrrrr1",
-    "01rrrr10",
-    "1r1001r1",
-    "10000001"
+    "1rRRRRr1",
+    "1R1001R1",
+    "01000010"
   ],
   brullOscuro: [
-    "00000000",
+    "00111100",
+    "01XBBX10",
+    "1Xr11rX1",
+    "1XBBBBX1",
     "01111110",
-    "1RRRRRR1",
-    "1R1RR1R1",
-    "1RRRRRR1",
-    "01RRRR10",
-    "1R1001R1",
-    "10000001"
+    "1BXXXXB1",
+    "1X1001X1",
+    "01000010"
   ],
   spectre: [
     "00111100",
@@ -122,6 +142,96 @@ const SPRITES = {
     "001cc100",
     "01100110",
     "11000011"
+  ],
+  rock: [
+    "00000000",
+    "00011100",
+    "0011DD10",
+    "01k1DD10",
+    "01kkDD11",
+    "0111kDD1",
+    "00011110",
+    "00000000"
+  ],
+  bush: [
+    "00000000",
+    "00011000",
+    "011uu110",
+    "1UuuuuU1",
+    "1UuuuuU1",
+    "011UU110",
+    "00011000",
+    "00000000"
+  ],
+  well: [
+    "00000000",
+    "00LZZL00",
+    "00LnnL00",
+    "0LnnnnL0",
+    "0LkkkkL0",
+    "00kDDk00",
+    "00000000",
+    "00000000"
+  ],
+  sign: [
+    "00000000",
+    "00000000",
+    "00LnnL00",
+    "0LnnnnL0",
+    "0LnnnnL0",
+    "000L0000",
+    "000L0000",
+    "00000000"
+  ],
+  houseRoof: [
+    "KKKKKKKK",
+    "1JJJJJJ1",
+    "11JJJJ11",
+    "KKKKKKKK",
+    "1JJJJJJ1",
+    "11JJJJ11",
+    "KKKKKKKK",
+    "1JJJJJJ1"
+  ],
+  houseWall: [
+    "LLLLLLLL",
+    "HGHGHGHG",
+    "GHGHGHGH",
+    "HGHGHGHG",
+    "GHGHGHGH",
+    "HGHGHGHG",
+    "LLLLLLLL",
+    "KKKKKKKK"
+  ],
+  woodFloor: [
+    "nnnnnnnn",
+    "nLnLnLnL",
+    "LnnnnnnL",
+    "nnnnnnnn",
+    "LnLnLnLn",
+    "LnnnnnnL",
+    "nnnnnnnn",
+    "nLnLnLnL"
+  ],
+  swordIcon: [
+    "000000vv",
+    "00000v1v",
+    "0000vv00",
+    "000vv000",
+    "00vv0000",
+    "0Ev00000",
+    "E0E00000",
+    "0E000000"
+  ],
+  shieldIcon: [
+    "ssssssss",
+    "slhhlhhs",
+    "slllllls",
+    "slhhlhhs",
+    "0shllhs0",
+    "00shhs00",
+    "000ss000",
+    "00000000"
   ]
 };
 
@@ -135,6 +245,9 @@ const COLORS: Record<string, string> = {
   'm': '#a855f7', // mage purple
   'r': '#ef4444', // red brull
   'R': '#7f1d1d', // dark red brull
+  'y': '#fef08a', // yellow eye brull
+  'X': '#111827', // darker grey brullOscuro
+  'B': '#374151', // lighter grey brullOscuro
   'p': '#10b981', // green spectre
   'g': '#4ade80', // potion green
   't': '#064e3b', // tree dark green
@@ -145,9 +258,19 @@ const COLORS: Record<string, string> = {
   'F': '#1e293b', // floor light
   'w': '#3b82f6', // water wave
   'D': '#94a3b8', // Tombstone
+  'k': '#4b5563', // rock
+  'u': '#65a30d', // bush base
+  'U': '#4d7c0f', // bush shade
+  'L': '#78350f', // dark wood outline
+  'Z': '#d97706', // roof for well
+  'n': '#b45309', // wood inner
+  'H': '#f8fafc', // House wall light
+  'G': '#cbd5e1', // House wall shade
+  'J': '#ea580c', // Roof tile
+  'K': '#c2410c', // Roof shade
 };
 
-const PixelSprite = ({ spriteKey, className = '' }: { spriteKey: keyof typeof SPRITES, className?: string }) => {
+export const PixelSprite = ({ spriteKey, className = '' }: { spriteKey: keyof typeof SPRITES, className?: string }) => {
   const data = SPRITES[spriteKey];
   return (
     <svg 
@@ -165,14 +288,32 @@ const PixelSprite = ({ spriteKey, className = '' }: { spriteKey: keyof typeof SP
   );
 };
 
-export const getEntityIcon = (type: EntityType, isDead: boolean, name?: string) => {
+export const getEntityIcon = (type: EntityType, isDead: boolean, name?: string, stepParity?: boolean) => {
   if (isDead) return <PixelSprite spriteKey="dead" className="opacity-70" />;
+  const parityClass = stepParity ? 'scale-x-[-1] translate-y-[-2px]' : 'scale-x-100 translate-y-0';
+  
   switch (type) {
-    case 'player': return <PixelSprite spriteKey="player" className="drop-shadow-[0_0_2px_rgba(59,130,246,0.8)] scale-[1.1] z-10 relative" />;
-    case 'npc': return <PixelSprite spriteKey="npc" className="scale-[1.1] drop-shadow-[0_0_2px_rgba(168,85,247,0.5)] z-10 relative" />;
+    case 'player': return (
+      <div className="animate-char-idle absolute inset-0 flex items-center justify-center z-10" style={{animationDelay: '0s'}}>
+        <PixelSprite spriteKey="player" className={`drop-shadow-[0_0_2px_rgba(59,130,246,0.8)] scale-[1.1] relative transition-transform duration-150 ${parityClass}`} />
+      </div>
+    );
+    case 'npc': 
+      let npcKey = 'npc';
+      if (name?.includes('Aldeano')) npcKey = 'villager';
+      else if (name?.includes('Anciano')) npcKey = 'elder';
+      return (
+        <div className="animate-char-idle absolute inset-0 flex items-center justify-center z-10" style={{animationDelay: '0.2s'}}>
+          <PixelSprite spriteKey={npcKey as any} className={`scale-[1.1] drop-shadow-[0_0_2px_rgba(168,85,247,0.5)] relative transition-transform duration-150 ${parityClass}`} />
+        </div>
+      );
     case 'enemy': 
       const sKey = name?.includes('Oscuro') ? 'brullOscuro' : (name?.includes('Espectro') ? 'spectre' : (name?.includes('Paja') ? 'dummy' : 'brull'));
-      return <PixelSprite spriteKey={sKey as any} className="drop-shadow-[0_0_4px_rgba(239,68,68,0.6)] z-10 relative" />;
+      return (
+        <div className="animate-enemy-float absolute inset-0 flex items-center justify-center z-10" style={{animationDelay: '0.5s'}}>
+          <PixelSprite spriteKey={sKey as any} className={`drop-shadow-[0_0_4px_rgba(239,68,68,0.6)] relative transition-transform duration-150 ${parityClass}`} />
+        </div>
+      );
     case 'item': return <PixelSprite spriteKey="potion" className="drop-shadow-[0_0_4px_rgba(74,222,128,0.8)] animate-bounce z-10 relative" />;
     default: return null;
   }
@@ -204,6 +345,45 @@ export const getTileVisual = (type: string) => {
     case 'water': return (
       <div className="w-full h-full bg-[#1e3a8a] relative">
         <PixelSprite spriteKey="water" className="absolute inset-0 scale-[1.25] opacity-60 animate-pulse" />
+      </div>
+    );
+    case 'rock': return (
+      <div className="w-full h-full bg-[#020617] relative">
+        <PixelSprite spriteKey="floor" className="absolute inset-0 scale-[1.25]" />
+        <PixelSprite spriteKey="rock" className="absolute inset-0 scale-[1.4] drop-shadow-[0_2px_1px_rgba(0,0,0,0.8)] z-10" />
+      </div>
+    );
+    case 'bush': return (
+      <div className="w-full h-full bg-[#020617] relative">
+        <PixelSprite spriteKey="floor" className="absolute inset-0 scale-[1.25]" />
+        <PixelSprite spriteKey="bush" className="absolute inset-0 scale-[1.5] drop-shadow-[0_2px_1px_rgba(0,0,0,0.8)] z-10" />
+      </div>
+    );
+    case 'well': return (
+      <div className="w-full h-full bg-[#020617] relative">
+        <PixelSprite spriteKey="floor" className="absolute inset-0 scale-[1.25]" />
+        <PixelSprite spriteKey="well" className="absolute inset-0 scale-[1.5] drop-shadow-[0_2px_1px_rgba(0,0,0,0.8)] z-10" />
+      </div>
+    );
+    case 'sign': return (
+      <div className="w-full h-full bg-[#020617] relative">
+        <PixelSprite spriteKey="floor" className="absolute inset-0 scale-[1.25]" />
+        <PixelSprite spriteKey="sign" className="absolute inset-0 scale-[1.5] drop-shadow-[0_2px_1px_rgba(0,0,0,0.8)] z-10" />
+      </div>
+    );
+    case 'houseWall': return (
+      <div className="w-full h-full bg-[#0f172a] relative">
+        <PixelSprite spriteKey="houseWall" className="absolute inset-0 scale-[1.25]" />
+      </div>
+    );
+    case 'houseRoof': return (
+      <div className="w-full h-full bg-[#7f1d1d] relative z-20">
+        <PixelSprite spriteKey="houseRoof" className="absolute inset-0 scale-[1.25]" />
+      </div>
+    );
+    case 'woodFloor': return (
+      <div className="w-full h-full bg-[#451a03] relative">
+        <PixelSprite spriteKey="woodFloor" className="absolute inset-0 scale-[1.25]" />
       </div>
     );
     default: return <div className="w-full h-full bg-black" />;

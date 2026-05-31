@@ -63,3 +63,19 @@ body {
   image-rendering: crisp-edges;
 }
 
+@keyframes char-idle {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-2px) scaleY(0.95); }
+}
+.animate-char-idle {
+  animation: char-idle 0.8s infinite ease-in-out;
+}
+
+@keyframes enemy-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.05); }
+}
+.animate-enemy-float {
+  animation: enemy-float 2s infinite ease-in-out;
+}
+
