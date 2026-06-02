@@ -50,8 +50,26 @@ export default function App() {
 
           {gameState === 'STUDIO_LOGO' && (
             <div className="absolute inset-0 bg-black flex flex-col items-center justify-center z-50 text-center animate-fade-in-out">
-               <h2 className="text-2xl sm:text-4xl text-white mb-2 tracking-widest drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]">Cool Games Studio</h2>
-               <p className="text-gray-500 text-[10px] uppercase">Presents</p>
+              <h2 className="text-2xl sm:text-4xl mb-2 tracking-widest font-bold drop-shadow-[0_0_8px_rgba(255,165,0,0.5)]">
+                <span className="text-red-500">C</span>
+                <span className="text-orange-500">O</span>
+                <span className="text-blue-500">O</span>
+                <span className="text-red-500">L</span>
+                {' '}
+                <span className="text-orange-500">G</span>
+                <span className="text-blue-500">A</span>
+                <span className="text-red-500">M</span>
+                <span className="text-orange-500">E</span>
+                <span className="text-blue-500">S</span>
+                {' '}
+                <span className="text-red-500">S</span>
+                <span className="text-orange-500">T</span>
+                <span className="text-blue-500">U</span>
+                <span className="text-red-500">D</span>
+                <span className="text-orange-500">I</span>
+                <span className="text-blue-500">O</span>
+              </h2>
+               <p className="text-gray-500 text-[10px] uppercase">Presenta</p>
             </div>
           )}
 
@@ -96,8 +114,27 @@ export default function App() {
                 </button>
               </div>
               
-              <div className="absolute bottom-2 text-[var(--color-game-ui)] text-[6px] sm:text-[10px] opacity-70">
-                © 2026 Cool Games Studio
+              <div className="absolute bottom-2 text-[6px] sm:text-[10px] opacity-70">
+                <span className="text-[var(--color-game-ui)]">© 2026 </span>
+                <span className="font-bold">
+                  <span className="text-red-500">C</span>
+                  <span className="text-orange-500">O</span>
+                  <span className="text-blue-500">O</span>
+                  <span className="text-red-500">L</span>
+                  {' '}
+                  <span className="text-orange-500">G</span>
+                  <span className="text-blue-500">A</span>
+                  <span className="text-red-500">M</span>
+                  <span className="text-orange-500">E</span>
+                  <span className="text-blue-500">S</span>
+                  {' '}
+                  <span className="text-red-500">S</span>
+                  <span className="text-orange-500">T</span>
+                  <span className="text-blue-500">U</span>
+                  <span className="text-red-500">D</span>
+                  <span className="text-orange-500">I</span>
+                  <span className="text-blue-500">O</span>
+                </span>
               </div>
             </div>
           )}

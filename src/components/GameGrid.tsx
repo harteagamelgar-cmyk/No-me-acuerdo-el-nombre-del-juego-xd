@@ -102,6 +102,26 @@ export const GameGrid: React.FC<GridProps> = ({ level, mapLayout, player, npc, e
       >
         {getEntityIcon(player.type, player.isDead, player.name, (player.x + player.y) % 2 !== 0)}
       </motion.div>
+
+      {/* Dynamic Lighting per Level */}
+      {level.id === 'cave' ? (
+        <>
+          <div className="absolute inset-0 pointer-events-none z-50 bg-[#020205] mix-blend-multiply opacity-95" />
+          <motion.div 
+            className="absolute inset-0 pointer-events-none z-50 mix-blend-screen"
+            initial={false}
+            animate={{
+              background: `radial-gradient(circle at ${(player.x + 0.5) * (100 / MAP_WIDTH)}% ${(player.y + 0.5) * (100 / MAP_HEIGHT)}%, rgba(200,150,50,0.3) 0%, rgba(200,100,20,0.1) 15%, transparent 35%)`
+            }}
+          />
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 pointer-events-none z-50 bg-[#050f2c] mix-blend-multiply opacity-80" />
+          <div className="absolute inset-0 pointer-events-none z-50 bg-gradient-to-tr from-transparent via-[#2d4b8e]/20 to-[#a3c2ff]/20 mix-blend-lighten" />
+        </>
+      )}
+
     </div>
   );
 };

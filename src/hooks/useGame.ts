@@ -136,7 +136,7 @@ export function useGame() {
   };
 
   const checkVictory = (currentEnemies: Entity[]) => {
-    if (currentEnemies.every(e => e.isDead)) {
+    if (currentEnemies.filter(e => e.type !== 'npc').every(e => e.isDead)) {
       setGameState('VICTORY');
       setCurrentDialogue(currentLevel.winDialogue);
       setDialogueIndex(0);
